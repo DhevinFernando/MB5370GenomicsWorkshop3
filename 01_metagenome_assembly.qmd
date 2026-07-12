@@ -11,3 +11,72 @@ Commands
 
 ``` bash
 ```
+
+```{r}
+library(tidyverse)
+
+rl_data <- read_tsv("read_lengths.txt",col_names = c("id","length"), show_col_types = FALSE)
+
+ggplot(rl_data, aes(x=length/1000)) + 
+  geom_histogram(binwidth = 2) +
+  xlab("Read Length Kb") + ylab("Number of Reads")
+```
+
+```{r}
+total_len <- sum(rl_data$length)
+
+rl_data %>% 
+  arrange(desc(length)) %>% 
+  mutate(cumsum = cumsum(length)) %>% 
+  filter(cumsum>total_len/2) %>% 
+  head(n=1)
+```
+
+largest contig coverage 4681059 and 21x depth
+
+edge 42 contig is most abundant
+
+AP024165.1 AP024166.1 are vibrio alfacsensis
+
+```{r}
+gc <- read_tsv("assembly_check/assembly.gc.tsv",col_names = c("#seq_name","length","GC"))
+info <- read_tsv("flye/mock/assembly_info.txt") 
+```
+
+left join the two
+
+```{r}
+gc_info <- info %>% 
+  left_join(gc)
+```
+
+histogram by gc content
+
+```{r}
+gc_info %>% 
+  ggplot(aes(x=GC)) + geom_histogram() + ylab("Number of contigs")
+```
+
+```{r}
+gc_info %>% 
+  filter(GC<0.8) %>% 
+  filter(cov.<25) %>% 
+  ggplot(aes(x=GC,y=cov.)) + geom_point(aes(size=length)) + ylab("Coverage depth")
+```
+
+```{r}
+#install.packages("ggrepel")
+library(ggrepel)
+gc_info %>% 
+  filter(GC<0.8) %>% 
+  filter(cov.<25) %>% 
+  ggplot(aes(x=GC,y=cov.)) + geom_point(aes(size=length)) + geom_label_repel(aes(label=`#seq_name`))
+```
+
+reference length: 24095709
+
+assembly length: 18413144
+
+checkM RESULTS
+
+f\_\_Vibrionaceae (UID4865) bin 7 has the most contamination of 1.56
