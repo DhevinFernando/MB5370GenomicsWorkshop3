@@ -1,2 +1,2 @@
 # MB5370GenomicsWorkshop3
-Metagenome assembly of 5 bacterial spp
+this is a repo for the contents of module 4 workshop 3
